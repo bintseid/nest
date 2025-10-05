@@ -9,7 +9,7 @@ import { Suspense } from "react"
 export const metadata: Metadata = {
   title: "Nest - Stream Movies & Series",
   description: "Modern streaming platform for movies and TV series",
-  generator: "v0.app",
+  generator: "Nest Team" // <-- added to override "v0.app"
 }
 
 export default function RootLayout({
