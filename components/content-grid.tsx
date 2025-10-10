@@ -63,16 +63,25 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
   }, [selectedSeries])
 
   const handleDownload = async (item: Content, e: React.MouseEvent) => {
+    e.preventDefault()
     e.stopPropagation()
 
     if (downloadingIds.has(item.movie_id)) {
       return
     }
 
-    setDownloadingIds((prev) => new Set(prev).add(item.movie_id))
+    // add to downloading set (create new Set to avoid mutating state)
+    setDownloadingIds((prev) => {
+      const s = new Set(prev)
+      s.add(item.movie_id)
+      return s
+    })
 
     try {
-      const authToken = localStorage.getItem("nest-auth-token")
+      const authToken =
+        typeof window !== "undefined"
+          ? localStorage.getItem("nest-auth-token") || localStorage.getItem("nest_auth_token")
+          : null
 
       if (!authToken) {
         alert("Please login to download content")
@@ -84,27 +93,17 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
         return
       }
 
-      const streamResponse = await fetch(
-        `${API_BASE}/stream?id=${item.movie_id}&collection=${item.collection_id}&token=${authToken}`,
-      )
+      // Build direct download via proxy so headers/cookies are properly forwarded.
+      const directDownloadUrl = `/api/proxy?path=/direct_download&id=${encodeURIComponent(
+        item.movie_id
+      )}&collection=${encodeURIComponent(item.collection_id || "")}&collection_id=${encodeURIComponent(
+        item.collection_id || ""
+      )}&token=${encodeURIComponent(authToken)}`
 
-      if (!streamResponse.ok) {
-        throw new Error("Failed to get download token")
-      }
+      // Open in new tab to trigger browser download (proxy will preserve redirects and headers)
+      window.open(directDownloadUrl, "_blank", "noopener")
 
-      const streamUrl = streamResponse.url
-      const urlParams = new URLSearchParams(streamUrl.split("?")[1])
-      const downloadToken = urlParams.get("token") || authToken
-
-      const downloadUrl = `${API_BASE}/direct_download?token=${downloadToken}`
-
-      const link = document.createElement("a")
-      link.href = downloadUrl
-      link.download = `${item.series_name || item.name}.mp4`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
+      // record locally
       const downloads = JSON.parse(localStorage.getItem("nest-downloads") || "[]")
       const downloadItem = {
         ...item,
@@ -119,6 +118,7 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
       console.error("Download error:", error)
       alert("Failed to download. Please login and try again.")
     } finally {
+      // remove id from downloading set
       setTimeout(() => {
         setDownloadingIds((prev) => {
           const newSet = new Set(prev)
@@ -160,18 +160,19 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         {content.map((item) => {
-          const thumbnailUrl =
-            item.thumbnail ||
-            `/placeholder.svg?height=450&width=300&query=${encodeURIComponent(item.series_name || item.name)}`
+          // prefer trimmed thumbnail string, fallback to placeholder
+          const thumbnailUrl = (item.thumbnail && item.thumbnail.trim())
+            ? item.thumbnail.trim()
+            : `/placeholder.svg?height=450&width=300&query=${encodeURIComponent(item.series_name || item.name)}`
 
-          return (
+           return (
             <div
               key={item.movie_id}
               className="group relative aspect-[2/3] rounded-lg overflow-hidden glass cursor-pointer transition-all hover:scale-105 hover:shadow-xl hover:shadow-primary/20"
               onClick={(e) => handleSeriesClick(item, e)}
             >
               <img
-                src={thumbnailUrl || "/placeholder.svg"}
+                src={thumbnailUrl}
                 alt={item.series_name || item.name}
                 className="w-full h-full object-cover"
               />
@@ -246,11 +247,11 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {seriesEpisodes.map((episode) => {
-                    const thumbnailUrl =
-                      episode.thumbnail ||
-                      `/placeholder.svg?height=300&width=200&query=${encodeURIComponent(episode.series_name || episode.name)}`
+                    const thumbnailUrl = (episode.thumbnail && episode.thumbnail.trim())
+                      ? episode.thumbnail.trim()
+                      : `/placeholder.svg?height=300&width=200&query=${encodeURIComponent(episode.series_name || episode.name)}`
 
-                    return (
+                     return (
                       <div
                         key={episode.movie_id}
                         className="glass rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-all"
@@ -261,7 +262,7 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
                       >
                         <div className="relative aspect-video">
                           <img
-                            src={thumbnailUrl || "/placeholder.svg"}
+                            src={thumbnailUrl}
                             alt={episode.name}
                             className="w-full h-full object-cover"
                           />

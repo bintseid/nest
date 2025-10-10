@@ -49,7 +49,11 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
     }
   }
 
-  const handleVerifyOtp = async () => {
+  const handleVerify = async () => {
+    if (!phone?.trim() || !otp?.trim()) {
+      setError("Phone and code are required")
+      return
+    }
     setLoading(true)
     setError("")
 
@@ -57,13 +61,16 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
       const response = await fetch("https://nestfilm.hopto.org/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, otp }),
+        body: JSON.stringify({ phone: phone.trim(), code: otp.trim() }),
       })
 
       const data = await response.json()
 
       if (response.ok) {
+        // store canonical key and keep old key for compatibility
+        localStorage.setItem("nest-auth-token", data.token)
         localStorage.setItem("nest_auth_token", data.token)
+        console.log("login/verify OK, token saved:", data.token)
         onSuccess(data.token, data.user)
       } else {
         setError(data.error || "Invalid OTP")
@@ -140,7 +147,7 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
                 Back
               </Button>
               <Button
-                onClick={handleVerifyOtp}
+                onClick={handleVerify}
                 disabled={loading || !otp}
                 className="flex-1 bg-primary hover:bg-primary/90"
               >
