@@ -28,7 +28,7 @@ export function MobileNav({ currentPage, onPageChange }: MobileNavProps) {
               key={item.id}
               onClick={() => onPageChange(item.id)}
               className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[60px] ${
-                isActive ? "text-primary" : "text-muted-foreground"
+                isActive ? "text-[#1a88f0]" : "text-white"
               }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : ""}`} />

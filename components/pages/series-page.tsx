@@ -48,7 +48,7 @@ export function SeriesPage({ onPlayContent }: SeriesPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      <h2 className="text-2xl font-bold">TV Series</h2>
+      <h2 className="text-2xl font-bold text-white">TV Series</h2>
       <ContentGrid content={series} loading={loading} onPlayContent={onPlayContent} />
     </div>
   )

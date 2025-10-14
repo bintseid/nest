@@ -2,8 +2,9 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Play, Download, X } from "lucide-react"
+import { Play, Download, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import type { Content } from "./streaming-app"
 
 interface ContentGridProps {
@@ -19,6 +20,7 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
   const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set())
   const [seriesEpisodes, setSeriesEpisodes] = useState<Content[]>([])
   const [loadingEpisodes, setLoadingEpisodes] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     if (!selectedSeries) {
@@ -182,7 +184,8 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
                   <Button
                     size="icon"
-                    className="rounded-full bg-primary hover:bg-primary/90"
+                    variant="glass"
+                    className="rounded-full bg-transparent"
                     onClick={(e) => {
                       e.stopPropagation()
                       onPlayContent(item)
@@ -192,7 +195,7 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
                   </Button>
                   <Button
                     size="icon"
-                    variant="outline"
+                    variant="glass"
                     className="rounded-full bg-transparent"
                     onClick={(e) => handleDownload(item, e)}
                     disabled={downloadingIds.has(item.movie_id)}
@@ -201,8 +204,8 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
                   </Button>
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-3 space-y-1">
-                  <h3 className="font-medium text-sm line-clamp-2">{item.series_name || item.name}</h3>
+                <div className="absolute bottom-0 left-0 right-0 p-2 space-y-1">
+                  <h3 className="font-medium text-xs line-clamp-2">{item.series_name || item.name}</h3>
                   {item.episode && (
                     <p className="text-xs text-muted-foreground">
                       S{item.season || 1} E{item.episode}
@@ -215,7 +218,7 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
               </div>
 
               {item.collection_id === "series" && item.series_name && (
-                <div className="absolute top-2 left-2 bg-primary/90 rounded-full px-2 py-1 text-xs font-medium">
+                <div className="absolute top-2 left-2 glass rounded-full px-2 py-1 text-xs font-medium border border-primary/50">
                   Episodes
                 </div>
               )}
@@ -227,84 +230,109 @@ export function ContentGrid({ content, loading, onPlayContent }: ContentGridProp
       {selectedSeries && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="glass-strong rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-border/50">
-              <h2 className="text-2xl font-bold">{selectedSeries}</h2>
-              <Button size="icon" variant="ghost" onClick={() => setSelectedSeries(null)}>
+            <div className="flex items-center justify-between p-4 border-b border-border/50">
+              <h2 className="text-xl font-bold truncate max-w-[80%]">{selectedSeries}</h2>
+              <Button size="icon" variant="glass" onClick={() => setSelectedSeries(null)}>
                 <X className="w-5 h-5" />
               </Button>
+            </div>
+            <div className="p-4 border-b border-border/50">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search episodes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="glass bg-transparent border-primary/50 text-white pl-10 h-10"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white" />
+              </div>
             </div>
             <div className="overflow-y-auto p-6">
               {loadingEpisodes ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="glass rounded-lg aspect-video animate-pulse" />
+                    <div key={i} className="bg-[#1f1f2e] rounded-lg aspect-video animate-pulse" />
                   ))}
                 </div>
-              ) : seriesEpisodes.length === 0 ? (
+              ) : seriesEpisodes.filter(episode => 
+                !searchQuery || 
+                episode.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                `Episode ${episode.episode}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (episode.season && `Season ${episode.season}`.toLowerCase().includes(searchQuery.toLowerCase()))
+              ).length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">No episodes found for this series</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {seriesEpisodes.map((episode) => {
-                    const thumbnailUrl = (episode.thumbnail && episode.thumbnail.trim())
-                      ? episode.thumbnail.trim()
-                      : `/placeholder.svg?height=300&width=200&query=${encodeURIComponent(episode.series_name || episode.name)}`
-
-                     return (
-                      <div
-                        key={episode.movie_id}
-                        className="glass rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-all"
-                        onClick={() => {
-                          setSelectedSeries(null)
-                          onPlayContent(episode)
-                        }}
-                      >
-                        <div className="relative aspect-video">
-                          <img
-                            src={thumbnailUrl}
-                            alt={episode.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-3">
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium">
-                                Episode {episode.episode}
-                                {episode.season && ` - Season ${episode.season}`}
-                              </p>
-                              <p className="text-xs text-muted-foreground line-clamp-1">{episode.name}</p>
-                            </div>
-                          </div>
-                          <Button
-                            size="icon"
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                          >
-                            <Play className="w-5 h-5 fill-current" />
-                          </Button>
-                        </div>
-                        <div className="p-3 space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">
-                              {(episode.file_size / (1024 * 1024)).toFixed(0)} MB
-                            </span>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full bg-transparent"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDownload(episode, e)
-                            }}
-                            disabled={downloadingIds.has(episode.movie_id)}
-                          >
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
-                          </Button>
-                        </div>
-                      </div>
+                  {seriesEpisodes
+                    .filter(episode => 
+                      !searchQuery || 
+                      episode.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      `Episode ${episode.episode}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (episode.season && `Season ${episode.season}`.toLowerCase().includes(searchQuery.toLowerCase()))
                     )
-                  })}
+                    .map((episode) => {
+                      const thumbnailUrl = (episode.thumbnail && episode.thumbnail.trim())
+                        ? episode.thumbnail.trim()
+                        : `/placeholder.svg?height=300&width=200&query=${encodeURIComponent(episode.series_name || episode.name)}`
+
+                       return (
+                        <div
+                          key={episode.movie_id}
+                          className="glass rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-all"
+                          onClick={() => {
+                            setSelectedSeries(null)
+                            onPlayContent(episode)
+                          }}
+                        >
+                          <div className="relative aspect-video">
+                            <img
+                              src={thumbnailUrl}
+                              alt={episode.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-2">
+                              <div className="space-y-0.5">
+                                <p className="text-xs font-medium">
+                                  Ep {episode.episode}
+                                  {episode.season && ` • S${episode.season}`}
+                                </p>
+                                <p className="text-xs text-muted-foreground line-clamp-1">{episode.name}</p>
+                              </div>
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="glass"
+                              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-transparent"
+                            >
+                              <Play className="w-5 h-5 fill-current" />
+                            </Button>
+                          </div>
+                          <div className="p-3 space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-muted-foreground">
+                                {(episode.file_size / (1024 * 1024)).toFixed(0)} MB
+                              </span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="glass"
+                              className="w-full"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDownload(episode, e)
+                              }}
+                              disabled={downloadingIds.has(episode.movie_id)}
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      )
+                    })}
                 </div>
               )}
             </div>

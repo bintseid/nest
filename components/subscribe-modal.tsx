@@ -61,14 +61,14 @@ export function SubscribeModal({ open, onClose, authToken, user, onSuccess }: Su
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="glass-strong rounded-lg w-full max-w-2xl p-6 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#252538]/80 backdrop-blur-sm">
+      <div className="bg-[#1f1f2e] rounded-lg w-full max-w-2xl p-6 space-y-6 border border-[#1a88f0]/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Crown className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-bold">Subscribe</h2>
+            <Crown className="w-6 h-6 text-[#1a88f0]" />
+            <h2 className="text-2xl font-bold text-white">Subscribe</h2>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} className="text-white hover:text-[#1a88f0]">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -78,33 +78,33 @@ export function SubscribeModal({ open, onClose, authToken, user, onSuccess }: Su
             <button
               key={plan.days}
               onClick={() => setSelectedPlan(plan.days)}
-              className={`glass rounded-lg p-6 space-y-4 transition-all ${
-                selectedPlan === plan.days ? "ring-2 ring-primary bg-primary/10" : "hover:bg-secondary"
+              className={`bg-[#252538] rounded-lg p-6 space-y-4 transition-all border ${
+                selectedPlan === plan.days ? "border-[#1a88f0] bg-[#1a88f0]/10" : "border-[#1a88f0]/30 hover:bg-[#252538]"
               } ${plan.popular ? "relative" : ""}`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#1a88f0] text-white text-xs font-medium px-3 py-1 rounded-full">
                   Popular
                 </div>
               )}
 
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold">{plan.days} Days</h3>
-                <p className="text-3xl font-bold text-primary">${plan.price}</p>
+                <h3 className="text-2xl font-bold text-white">{plan.days} Days</h3>
+                <p className="text-3xl font-bold text-[#1a88f0]">${plan.price}</p>
               </div>
 
               <ul className="space-y-2 text-sm text-left">
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-primary" />
-                  <span>Unlimited streaming</span>
+                  <Check className="w-4 h-4 text-[#1a88f0]" />
+                  <span className="text-white">Unlimited streaming</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-primary" />
-                  <span>HD quality</span>
+                  <Check className="w-4 h-4 text-[#1a88f0]" />
+                  <span className="text-white">HD quality</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-primary" />
-                  <span>Download content</span>
+                  <Check className="w-4 h-4 text-[#1a88f0]" />
+                  <span className="text-white">Download content</span>
                 </li>
               </ul>
             </button>
@@ -112,19 +112,20 @@ export function SubscribeModal({ open, onClose, authToken, user, onSuccess }: Su
         </div>
 
         {user && (
-          <div className="glass rounded-lg p-4 text-sm">
-            <p className="text-muted-foreground">
-              Current balance: <span className="text-foreground font-medium">${user.balance.toFixed(2)}</span>
+          <div className="bg-[#252538] rounded-lg p-4 text-sm border border-[#1a88f0]/30">
+            <p className="text-white">
+              Current balance: <span className="text-white font-medium">${user.balance.toFixed(2)}</span>
             </p>
           </div>
         )}
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-sm text-white">{error}</p>}
 
         <Button
           onClick={handleSubscribe}
           disabled={loading || !authToken}
-          className="w-full bg-primary hover:bg-primary/90"
+          variant="glass"
+          className="w-full border-[#1a88f0]"
         >
           {loading ? "Processing..." : `Subscribe for ${selectedPlan} days`}
         </Button>

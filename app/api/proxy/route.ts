@@ -55,6 +55,18 @@ export async function GET(req: Request) {
     const resHeaders = new Headers(backendRes.headers)
     resHeaders.set("Access-Control-Allow-Origin", "*")
     resHeaders.set("Access-Control-Expose-Headers", "Content-Range, Accept-Ranges, Content-Length, Content-Type")
+    
+    // Ensure proper MIME type for video streaming
+    if (path.includes('/stream') || path.includes('/video')) {
+      const contentType = backendRes.headers.get('content-type')
+      if (!contentType || !contentType.includes('video/')) {
+        // Set proper MP4 MIME type if not already set
+        resHeaders.set("Content-Type", "video/mp4")
+      }
+      // Ensure proper headers for video streaming
+      resHeaders.set("Accept-Ranges", "bytes")
+      resHeaders.set("Cache-Control", "public, max-age=31536000")
+    }
 
     // If we kept redirects manual (JSON flow), forward them to the browser
     if (

@@ -83,11 +83,19 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="glass-strong rounded-lg w-full max-w-md p-6 space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="glass-strong rounded-xl w-full max-w-md p-8 space-y-6 border border-[#1a88f0]/30">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Login</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <div className="space-y-1">
+            <h2 className="text-3xl font-bold text-white">
+              Welcome Back
+            </h2>
+            <p className="text-sm text-white">Sign in to continue watching</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="text-white hover:text-[#1a88f0] p-2 rounded-lg hover:bg-[#252538] transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -95,63 +103,83 @@ export function AuthModal({ open, onClose, onSuccess }: AuthModalProps) {
         {step === "phone" ? (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="text-white">Phone Number</Label>
               <Input
                 id="phone"
                 type="tel"
                 placeholder="+251912345678"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="glass"
+                className="bg-[#252538] border-[#1a88f0]/50 text-white"
               />
-              <p className="text-xs text-muted-foreground">Enter your registered phone number with country code</p>
+              <p className="text-xs text-white">Enter your registered phone number with country code</p>
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                <p className="text-sm text-destructive">{error}</p>
+              <div className="p-3 rounded-lg bg-[#252538] border border-[#1a88f0]/50">
+                <p className="text-sm text-white">{error}</p>
               </div>
             )}
 
             <Button
               onClick={handleRequestOtp}
               disabled={loading || !phone}
-              className="w-full bg-primary hover:bg-primary/90"
+              variant="glass"
+              className="w-full border-[#1a88f0] py-3 text-lg font-semibold rounded-lg"
             >
-              {loading ? "Sending..." : "Send OTP"}
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Sending...
+                </div>
+              ) : (
+                "Send OTP"
+              )}
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="otp">Verification Code</Label>
+              <Label htmlFor="otp" className="text-white">Verification Code</Label>
               <Input
                 id="otp"
                 type="text"
                 placeholder="Enter OTP"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="glass"
+                className="bg-[#252538] border-[#1a88f0]/50 text-white"
               />
-              <p className="text-xs text-muted-foreground">Check your Telegram for the verification code</p>
+              <p className="text-xs text-white">Check your Telegram for the verification code</p>
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                <p className="text-sm text-destructive">{error}</p>
+              <div className="p-3 rounded-lg bg-[#252538] border border-[#1a88f0]/50">
+                <p className="text-sm text-white">{error}</p>
               </div>
             )}
 
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep("phone")} className="flex-1 glass">
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setStep("phone")} 
+                className="flex-1 border-[#1a88f0]/50 text-white py-3 rounded-lg transition-all duration-200 hover:border-[#1a88f0]"
+              >
                 Back
               </Button>
               <Button
                 onClick={handleVerify}
                 disabled={loading || !otp}
-                className="flex-1 bg-primary hover:bg-primary/90"
+                variant="glass"
+                className="flex-1 border-[#1a88f0] py-3 text-lg font-semibold rounded-lg"
               >
-                {loading ? "Verifying..." : "Verify"}
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Verifying...
+                  </div>
+                ) : (
+                  "Verify"
+                )}
               </Button>
             </div>
           </div>

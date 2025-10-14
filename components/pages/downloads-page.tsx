@@ -43,7 +43,7 @@ export function DownloadsPage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Downloads</h2>
+        <h2 className="text-2xl font-bold text-white">Downloads</h2>
       </div>
 
       {/* Downloads List */}
@@ -60,26 +60,25 @@ export function DownloadsPage() {
                   />
                 )}
                 <div className="flex-1 space-y-1">
-                  <h3 className="font-medium">{download.series_name || download.name}</h3>
+                  <h3 className="font-medium text-white">{download.series_name || download.name}</h3>
                   {download.episode && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-white">
                       Season {download.season || 1} Episode {download.episode}
                     </p>
                   )}
-                  <p className="text-sm text-muted-foreground">{(download.file_size / (1024 * 1024)).toFixed(0)} MB</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-white">{(download.file_size / (1024 * 1024)).toFixed(0)} MB</p>
+                  <p className="text-xs text-white">
                     Downloaded {new Date(download.downloadedAt).toLocaleDateString()}
                   </p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button size="icon" variant="ghost" className="text-primary" onClick={() => handlePlay(download)}>
+                <Button size="icon" variant="glass" onClick={() => handlePlay(download)}>
                   <Play className="w-4 h-4" />
                 </Button>
                 <Button
                   size="icon"
-                  variant="ghost"
-                  className="text-destructive"
+                  variant="glass"
                   onClick={() => removeDownload(download.movie_id)}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -92,10 +91,10 @@ export function DownloadsPage() {
 
       {downloads.length === 0 && (
         <div className="glass rounded-lg p-12 text-center space-y-4">
-          <Download className="w-12 h-12 mx-auto text-muted-foreground" />
+          <Download className="w-12 h-12 mx-auto text-white" />
           <div className="space-y-2">
-            <h3 className="text-lg font-medium">No downloads yet</h3>
-            <p className="text-sm text-muted-foreground">Download content to watch offline</p>
+            <h3 className="text-lg font-medium text-white">No downloads yet</h3>
+            <p className="text-sm text-white">Download content to watch offline</p>
           </div>
         </div>
       )}
